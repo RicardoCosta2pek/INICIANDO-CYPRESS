@@ -1,33 +1,38 @@
-import { select } from 'async'
 import userData from '../fixtures/users/userData.json'
+import LoginPage from '../pages/loginPage'
+import DashboardPage from '../pages/dashboardPage'
+import MenuPage from '../pages/menuPage'
+
+const loginPage = new LoginPage()
+const dashboardPage = new DashboardPage()
+const menuPage = new MenuPage()
 
 describe('template spec', () => {
 
   const selectorsList = {
-    usernameField: "[name='username']",
-    passwordField: "[name='password']",
-    loginButton: "[type='submit']",
-    sectionTitleTopBar: ".oxd-topbar-header-breadcrumb-module",
-    dashboardGrid: ".orangehrm-dashboard-grid",
-    wrongCredentialAlert: "[role='alert']",
-    myInfoButton: '[href="/web/index.php/pim/viewMyDetails"]',
+
+    
     firstNameField: "[name='firstName']",
     lastNameField: "[name='lastName']",
     genericField: ".oxd-input--active",
     dataField: "[placeholder='yyyy-dd-mm']",
+    genericCombobox: ".oxd-select-text--arrow",
+    secondItemCombobox: ".oxd-select-dropdown > :nth-child(2)",
+    thirdItemCombobox: ".oxd-select-dropdown > :nth-child(3)",
     dateCloseButton: ".--close",
     submitButton: "[type='submit']"
 
   }
 
   it.only('User Info Update - Sucessed!', () => {
-    cy.visit('/auth/login')
-    cy.get(selectorsList.usernameField).type(userData.userSuccess.username)
-    cy.get(selectorsList.passwordField).type(userData.userSuccess.password)
-    cy.get(selectorsList.loginButton).click()
-    cy.location('pathname').should('equal', '/web/index.php/dashboard/index')
-    cy.get(selectorsList.dashboardGrid)
-    cy.get(selectorsList.myInfoButton).click()
+    loginPage.accessLoginPage()
+    loginPage.loginWithAnyUser(userData.userSuccess.username, userData.userSuccess.password)
+    dashboardPage.checkDashboardPage()
+    menuPage.accessMyInfo()
+
+    
+    
+
     cy.get(selectorsList.firstNameField).clear().type('FirstNameTest')
     cy.get(selectorsList.lastNameField).clear().type('LastNameTest')
     cy.get(selectorsList.genericField).eq(3).clear().type('123Test')
@@ -35,9 +40,14 @@ describe('template spec', () => {
     cy.get(selectorsList.genericField).eq(5).clear().type('123456')
     cy.get(selectorsList.genericField).eq(6).clear().type('2030-07-11')
     cy.get(selectorsList.dateCloseButton).click()
-    cy.get(selectorsList.submitButton).eq(0).click()
+    cy.get(selectorsList.submitButton).eq(0).click({ force: true })
     cy.get('body').should('contain', 'Successfully Updated')
     cy.get('.oxd-toast-close')
+
+    cy.get(selectorsList.genericCombobox).eq(0).click({ force: true })
+    cy.get(selectorsList.secondItemCombobox).click()
+    cy.get(selectorsList.genericCombobox).eq(1).click({ force: true })
+    cy.get(selectorsList.thirdItemCombobox).click()
 
   })
     it('Login Fail!', () => {
